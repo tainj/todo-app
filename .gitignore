@@ -66,3 +66,6 @@ nbdist/
 
 # OS X системные файлы
 .DS_Store
+
+# Environmet variables
+.env
