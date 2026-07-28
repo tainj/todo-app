@@ -2,9 +2,14 @@ package me.tainj.todo.model;
 
 import jakarta.persistence.*;
 import java.time.OffsetDateTime;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Table(name = "tasks")
+@Data
+@NoArgsConstructor
 public class Task {
 
     @Id
@@ -16,5 +21,6 @@ public class Task {
     private boolean completed;
 
     @Column(name = "created_at")
+    @CreationTimestamp
     private OffsetDateTime createdAt;
 }

@@ -24,7 +24,7 @@ public class TaskController {
 
     @PostMapping
     public Task create(@RequestBody Task task) {
-        return new Task();
+        return taskService.create(task);
     }
 
 }
