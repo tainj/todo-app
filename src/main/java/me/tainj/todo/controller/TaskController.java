@@ -2,6 +2,7 @@ package me.tainj.todo.controller;
 
 import me.tainj.todo.model.Task;
 import me.tainj.todo.service.TaskService;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,4 +28,19 @@ public class TaskController {
         return taskService.create(task);
     }
 
+    @GetMapping("/{id}")
+    public Task getTask(@PathVariable Long id) {
+        return taskService.getTask(id);
+    }
+
+    @PutMapping("/{id}")
+    public Task update(@PathVariable Long id, @RequestBody Task task) {
+        return taskService.update(id, task);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Long id) {
+        taskService.delete(id);
+    }
 }
