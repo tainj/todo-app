@@ -33,7 +33,7 @@ public class TaskService {
     }
 
     public TaskResponse getTask(Long id) {
-        return this.taskRepository.findById(id)
+        return taskRepository.findById(id)
                 .orElseThrow(() -> new TaskNotFoundException("task not found")).toResponse();
     }
 
