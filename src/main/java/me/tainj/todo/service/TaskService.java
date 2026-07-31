@@ -1,5 +1,6 @@
 package me.tainj.todo.service;
 
+import me.tainj.todo.exception.TaskNotFoundException;
 import me.tainj.todo.model.Task;
 import me.tainj.todo.repository.TaskRepository;
 import org.springframework.stereotype.Service;
@@ -30,7 +31,7 @@ public class TaskService {
 
     public Task update(Long id, Task updated) {
         Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Task not found"));
+                .orElseThrow(() -> new TaskNotFoundException("task not found"));
         task.setTitle(updated.getTitle());
         task.setDescription(updated.getDescription());
         task.setCompleted(updated.isCompleted());

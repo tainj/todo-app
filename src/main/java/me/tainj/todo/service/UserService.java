@@ -1,5 +1,7 @@
 package me.tainj.todo.service;
 
+import me.tainj.todo.exception.InvalidPasswordException;
+import me.tainj.todo.exception.UserNotFoundException;
 import me.tainj.todo.model.User;
 import me.tainj.todo.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,9 +28,9 @@ public class UserService {
     }
 
     public String login(String username, String password) {
-        User user = this.userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = this.userRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException("user not found"));
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new RuntimeException("wrong password");
+            throw new InvalidPasswordException("invalid password");
         }
         return jwtService.generateToken(username);
     }
