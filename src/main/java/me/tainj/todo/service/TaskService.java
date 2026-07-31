@@ -26,7 +26,7 @@ public class TaskService {
 
     public Task getTask(Long id) {
         return this.taskRepository.findById(id)
-                .orElseThrow();
+                .orElseThrow(() -> new TaskNotFoundException("task not found"));
     }
 
     public Task update(Long id, Task updated) {
