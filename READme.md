@@ -1,11 +1,21 @@
-## Запуск PostgreSQL
+## Running the application
 
-Из корня проекта (подготовьте переменные окружения):
+1. Copy the environment file and fill in your values:
+```bash
+cp .env.example .env
+```
 
-    cp .env.example .env
-    docker compose -f docker/docker-compose.yml up -d
+2. Start PostgreSQL:
+```bash
+docker compose -f docker/docker-compose.yml up -d
+```
 
-## Остановка
+3. Run the application:
+```bash
+export $(cat .env | xargs) && mvn spring-boot:run
+```
+
+## Stopping
 
 ```bash
 docker compose -f docker/docker-compose.yml down
