@@ -1,6 +1,8 @@
 package me.tainj.todo.controller;
 
-import me.tainj.todo.model.Task;
+import me.tainj.todo.dto.request.CreateTaskRequest;
+import me.tainj.todo.dto.request.UpdateTaskRequest;
+import me.tainj.todo.dto.response.TaskResponse;
 import me.tainj.todo.service.TaskService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -19,22 +21,22 @@ public class TaskController {
     }
 
     @GetMapping
-    public List<Task> getAll() {
+    public List<TaskResponse> getAll() {
         return taskService.getAll();
     }
 
     @PostMapping
-    public Task create(@RequestBody Task task) {
+    public TaskResponse create(@RequestBody CreateTaskRequest task) {
         return taskService.create(task);
     }
 
     @GetMapping("/{id}")
-    public Task getTask(@PathVariable Long id) {
+    public TaskResponse getTask(@PathVariable Long id) {
         return taskService.getTask(id);
     }
 
     @PutMapping("/{id}")
-    public Task update(@PathVariable Long id, @RequestBody Task task) {
+    public TaskResponse update(@PathVariable Long id, @RequestBody UpdateTaskRequest task) {
         return taskService.update(id, task);
     }
 

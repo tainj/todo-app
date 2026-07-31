@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import java.time.OffsetDateTime;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import me.tainj.todo.dto.response.TaskResponse;
 import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
@@ -16,11 +17,16 @@ public class Task {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String title;
     private String description;
     private boolean completed;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false, updatable = false)
     @CreationTimestamp
     private OffsetDateTime createdAt;
+
+    public TaskResponse toResponse() {
+        return new TaskResponse(id, title, description, completed, createdAt);
+    }
 }

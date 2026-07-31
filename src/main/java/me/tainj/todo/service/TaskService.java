@@ -1,5 +1,8 @@
 package me.tainj.todo.service;
 
+import me.tainj.todo.dto.request.CreateTaskRequest;
+import me.tainj.todo.dto.request.UpdateTaskRequest;
+import me.tainj.todo.dto.response.TaskResponse;
 import me.tainj.todo.exception.TaskNotFoundException;
 import me.tainj.todo.model.Task;
 import me.tainj.todo.repository.TaskRepository;
@@ -16,26 +19,31 @@ public class TaskService {
         this.taskRepository = taskRepository;
     }
 
-    public List<Task> getAll() {
-        return taskRepository.findAll();
+    public List<TaskResponse> getAll() {
+        return taskRepository.findAll().stream()
+                .map(Task::toResponse)
+                .toList();
     }
 
-    public Task create(Task task) {
-        return this.taskRepository.save(task);
+    public TaskResponse create(CreateTaskRequest request) {
+        Task task = new Task();
+        task.setTitle(request.title());
+        task.setDescription(request.description());
+        return taskRepository.save(task).toResponse();
     }
 
-    public Task getTask(Long id) {
+    public TaskResponse getTask(Long id) {
         return this.taskRepository.findById(id)
-                .orElseThrow(() -> new TaskNotFoundException("task not found"));
+                .orElseThrow(() -> new TaskNotFoundException("task not found")).toResponse();
     }
 
-    public Task update(Long id, Task updated) {
+    public TaskResponse update(Long id, UpdateTaskRequest updated) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new TaskNotFoundException("task not found"));
-        task.setTitle(updated.getTitle());
-        task.setDescription(updated.getDescription());
-        task.setCompleted(updated.isCompleted());
-        return taskRepository.save(task);
+        task.setTitle(updated.title());
+        task.setDescription(updated.description());
+        task.setCompleted(updated.completed());
+        return taskRepository.save(task).toResponse();
     }
 
     public void delete(Long id) {
