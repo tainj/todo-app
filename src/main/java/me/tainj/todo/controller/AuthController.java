@@ -1,6 +1,8 @@
 package me.tainj.todo.controller;
 
+import me.tainj.todo.dto.request.AuthRequest;
 import me.tainj.todo.dto.request.RegisterRequest;
+import me.tainj.todo.dto.response.AuthResponse;
 import me.tainj.todo.dto.response.UserResponse;
 import me.tainj.todo.model.User;
 import me.tainj.todo.service.UserService;
@@ -28,4 +30,15 @@ public class AuthController {
                 user.getUsername()
         );
     }
+
+    @PostMapping("/login")
+    public AuthResponse login(@RequestBody AuthRequest request) {
+        return new AuthResponse(
+                userService.login(
+                        request.getUsername(),
+                        request.getPassword()
+                )
+        );
+    }
+
 }
