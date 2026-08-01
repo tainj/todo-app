@@ -4,6 +4,7 @@ import me.tainj.todo.dto.request.CreateTaskRequest;
 import me.tainj.todo.dto.request.UpdateTaskRequest;
 import me.tainj.todo.dto.response.TaskResponse;
 import me.tainj.todo.dto.response.UserResponse;
+import me.tainj.todo.exception.AccessDeniedException;
 import me.tainj.todo.exception.TaskNotFoundException;
 import me.tainj.todo.exception.UserNotFoundException;
 import me.tainj.todo.model.Task;
@@ -41,23 +42,32 @@ public class TaskService {
         return taskRepository.save(task).toResponse();
     }
 
-    public TaskResponse getTask(Long id) {
-        return taskRepository.findById(id)
-                .orElseThrow(() -> new TaskNotFoundException("task not found")).toResponse();
-    }
-
-    public TaskResponse update(Long id, UpdateTaskRequest updated) {
+    public TaskResponse getTask(Long id, String username) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new TaskNotFoundException("task not found"));
-        task.setTitle(updated.title());
-        task.setDescription(updated.description());
-        task.setCompleted(updated.completed());
-        return taskRepository.save(task).toResponse();
+        if (!task.getUser().getUsername().equals(username)) {
+            throw new AccessDeniedException("access denied");
+        }
+        return task.toResponse();
     }
 
-    public void delete(Long id) {
-        if (!taskRepository.existsById(id)) {
-            throw new TaskNotFoundException("task not found");
+        public TaskResponse update(Long id, UpdateTaskRequest updated, String username) {
+            Task task = taskRepository.findById(id)
+                    .orElseThrow(() -> new TaskNotFoundException("task not found"));
+            if (!task.getUser().getUsername().equals(username)) {
+                throw new AccessDeniedException("access denied");
+            }
+            task.setTitle(updated.title());
+            task.setDescription(updated.description());
+            task.setCompleted(updated.completed());
+            return taskRepository.save(task).toResponse();
+        }
+
+    public void delete(Long id, String username) {
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new TaskNotFoundException("task not found"));
+        if (!task.getUser().getUsername().equals(username)) {
+            throw new AccessDeniedException("access denied");
         }
         taskRepository.deleteById(id);
     }
