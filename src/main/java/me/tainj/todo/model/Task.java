@@ -26,6 +26,10 @@ public class Task {
     @CreationTimestamp
     private OffsetDateTime createdAt;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
     public TaskResponse toResponse() {
         return new TaskResponse(id, title, description, completed, createdAt);
     }

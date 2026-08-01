@@ -6,6 +6,7 @@ import me.tainj.todo.dto.response.TaskResponse;
 import me.tainj.todo.service.TaskService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
@@ -21,13 +22,15 @@ public class TaskController {
     }
 
     @GetMapping
-    public List<TaskResponse> getAll() {
-        return taskService.getAll();
+    public List<TaskResponse> getAll(Authentication authentication) {
+        String username = authentication.getName();
+        return taskService.getAll(username);
     }
 
     @PostMapping
-    public TaskResponse create(@RequestBody CreateTaskRequest task) {
-        return taskService.create(task);
+    public TaskResponse create(Authentication authentication, @RequestBody CreateTaskRequest task) {
+        String username = authentication.getName();
+        return taskService.create(task, username);
     }
 
     @GetMapping("/{id}")
