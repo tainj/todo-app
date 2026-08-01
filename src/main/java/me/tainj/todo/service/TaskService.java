@@ -3,7 +3,6 @@ package me.tainj.todo.service;
 import me.tainj.todo.dto.request.CreateTaskRequest;
 import me.tainj.todo.dto.request.UpdateTaskRequest;
 import me.tainj.todo.dto.response.TaskResponse;
-import me.tainj.todo.dto.response.UserResponse;
 import me.tainj.todo.exception.AccessDeniedException;
 import me.tainj.todo.exception.TaskNotFoundException;
 import me.tainj.todo.exception.UserNotFoundException;
