@@ -6,6 +6,7 @@ import me.tainj.todo.dto.response.AuthResponse;
 import me.tainj.todo.dto.response.UserResponse;
 import me.tainj.todo.model.User;
 import me.tainj.todo.service.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,6 +20,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
+    @ResponseStatus(HttpStatus.CREATED)
     public UserResponse register(@RequestBody RegisterRequest request) {
         User user = userService.register(
                 request.username(),
