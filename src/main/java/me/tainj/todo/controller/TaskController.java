@@ -27,6 +27,7 @@ public class TaskController {
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public TaskResponse create(Authentication authentication, @RequestBody CreateTaskRequest task) {
         return taskService.create(task, getCurrentUsername(authentication));
     }

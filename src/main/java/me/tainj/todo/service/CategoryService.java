@@ -1,5 +1,6 @@
 package me.tainj.todo.service;
 
+import me.tainj.todo.dto.request.CreateCategoryRequest;
 import me.tainj.todo.dto.response.CategoryResponse;
 import me.tainj.todo.exception.UserNotFoundException;
 import me.tainj.todo.model.Category;
@@ -31,5 +32,13 @@ public class CategoryService {
         return categories.stream()
                 .map(Category::toResponse)
                 .toList();
+    }
+
+    public CategoryResponse create(String username, CreateCategoryRequest createCategoryRequest) {
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException("user not found"));
+        Category category = new Category();
+        category.setName(createCategoryRequest.name());
+        category.setUser(user);
+        return categoryRepository.save(category).toResponse();
     }
 }
