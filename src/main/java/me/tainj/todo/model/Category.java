@@ -3,6 +3,8 @@ package me.tainj.todo.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import me.tainj.todo.dto.response.CategoryResponse;
+import me.tainj.todo.dto.response.TaskResponse;
 
 @Entity
 @Table(name = "categories")
@@ -18,4 +20,8 @@ public class Category {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    public CategoryResponse toResponse() {
+        return new CategoryResponse(id, name, user == null);
+    }
 }
