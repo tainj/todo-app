@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import me.tainj.todo.dto.response.CategoryResponse;
-import me.tainj.todo.dto.response.TaskResponse;
 
 @Entity
 @Table(name = "categories")
@@ -23,5 +22,9 @@ public class Category {
 
     public CategoryResponse toResponse() {
         return new CategoryResponse(id, name, user == null);
+    }
+
+    public boolean isDefault() {
+        return user == null;
     }
 }

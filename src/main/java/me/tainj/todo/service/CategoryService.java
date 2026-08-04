@@ -1,7 +1,11 @@
 package me.tainj.todo.service;
 
 import me.tainj.todo.dto.request.CreateCategoryRequest;
+import me.tainj.todo.dto.request.UpdateCategoryRequest;
 import me.tainj.todo.dto.response.CategoryResponse;
+import me.tainj.todo.exception.AccessDeniedException;
+import me.tainj.todo.exception.CategoryNotFoundException;
+import me.tainj.todo.exception.DefaultCategoryException;
 import me.tainj.todo.exception.UserNotFoundException;
 import me.tainj.todo.model.Category;
 import me.tainj.todo.model.User;
@@ -39,6 +43,31 @@ public class CategoryService {
         Category category = new Category();
         category.setName(createCategoryRequest.name());
         category.setUser(user);
+        return categoryRepository.save(category).toResponse();
+    }
+
+    public void delete(Long id, String username) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new CategoryNotFoundException("category not found"));
+        if (category.isDefault()) {
+            throw new DefaultCategoryException("cannot delete default category");
+        }
+        if (!category.getUser().getUsername().equals(username)) {
+            throw new AccessDeniedException("access denied");
+        }
+        categoryRepository.deleteById(id);
+    }
+
+    public CategoryResponse update(Long id, UpdateCategoryRequest updateCategoryRequest, String username) {
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new CategoryNotFoundException("category not found"));
+        if (category.isDefault()) {
+            throw new DefaultCategoryException("cannot update default category");
+        }
+        if (!category.getUser().getUsername().equals(username)) {
+            throw new AccessDeniedException("access denied");
+        }
+        category.setName(updateCategoryRequest.name());
         return categoryRepository.save(category).toResponse();
     }
 }
