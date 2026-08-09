@@ -27,7 +27,7 @@ public class KafkaConfig {
     public ConsumerFactory<String, NotificationEvent> consumerFactory() {
         JsonDeserializer<NotificationEvent> deserializer = new JsonDeserializer<>(NotificationEvent.class);
         deserializer.setRemoveTypeHeaders(false);
-        deserializer.addTrustedPackages("*");
+        deserializer.addTrustedPackages("me.tainj.notification.model");
 
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
