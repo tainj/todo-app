@@ -42,4 +42,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleDefaultCategory(DefaultCategoryException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
+
+    @ExceptionHandler(TelegramLinkException.class)
+    public ResponseEntity<String> handleTelegramLink(TelegramLinkException e) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(e.getMessage());
+    }
 }

@@ -5,18 +5,32 @@
 cp .env.example .env
 ```
 
-2. Start PostgreSQL:
+2. Start infrastructure (PostgreSQL, Kafka, Redis):
 ```bash
 docker compose -f docker/docker-compose.yml up -d
 ```
 
-3. Run the application:
+3. Run services (each in a separate terminal):
+
+### todo-service
 ```bash
-export $(cat .env | xargs) && mvn spring-boot:run
+cd todo-service
+export $(cat ../.env | xargs) && mvn spring-boot:run
+```
+
+### notification-service
+```bash
+cd notification-service
+export $(cat ../.env | xargs) && mvn spring-boot:run
+```
+
+### scheduler-service
+```bash
+cd scheduler-service
+export $(cat ../.env | xargs) && mvn spring-boot:run
 ```
 
 ## Stopping
-
 ```bash
 docker compose -f docker/docker-compose.yml down
 ```
