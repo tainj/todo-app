@@ -39,7 +39,8 @@ public class TelegramLinkService {
             redisTemplate.opsForValue().set(key, userId, Duration.ofMinutes(10));
 
         } catch (Exception e) {
-            log.error("failed to write key in redis: {}", e.getMessage());
+            log.error("Failed to write key in Redis for token {} (userId={})", token, userId, e);
+            throw new me.tainj.todo.exception.TelegramLinkException("Telegram link is temporarily unavailable");
         }
         return new TelegramLinkResponse(url);
     }
