@@ -3,7 +3,6 @@ package me.tainj.notification.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import jakarta.persistence.Id;
 
 @Entity
 @Table(name = "users")
