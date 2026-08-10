@@ -1,6 +1,8 @@
 package me.tainj.notification.service;
 
 import me.tainj.notification.model.NotificationEvent;
+import me.tainj.notification.model.User;
+import me.tainj.notification.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,11 +16,13 @@ import java.time.Duration;
 
 @Service
 public class TelegramService extends TelegramLongPollingBot {
+    private final UserRepository userRepository;
     private final RedisTemplate<String, String> redisTemplate;
     private static final Logger log = LoggerFactory.getLogger(TelegramService.class);
 
-    public TelegramService(RedisTemplate<String, String> redisTemplate) {
+    public TelegramService(RedisTemplate<String, String> redisTemplate, UserRepository userRepository) {
         this.redisTemplate = redisTemplate;
+        this.userRepository = userRepository;
     }
 
     @Value("${telegram.bot.token}")
@@ -39,7 +43,18 @@ public class TelegramService extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        // обработка входящих сообщений от юзера
+        Long chatId = update.getMessage().getChatId();
+        String text = update.getMessage().getText();
+        if (text.startsWith("/start ")) {
+            String token = text.substring(7);
+            String userId = redisTemplate.opsForValue().get("telegram:link:" + token);
+            if (userId != null) {
+                User user = userRepository.findById(Long.parseLong(userId)).orElseThrow();
+                user.setTelegramChatId(chatId);
+                userRepository.save(user);
+                redisTemplate.delete("telegram:link:" + token);
+            }
+        }
     }
 
     public void send(NotificationEvent event) {

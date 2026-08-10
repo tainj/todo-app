@@ -1,4 +1,4 @@
-package me.tainj.notification.config;
+package me.tainj.scheduler.config;
 
 import me.tainj.notification.model.NotificationEvent;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -17,6 +17,7 @@ import org.apache.kafka.clients.admin.NewTopic;
 import java.util.HashMap;
 import java.util.Map;
 
+
 @Configuration
 public class KafkaConfig {
 
@@ -24,8 +25,8 @@ public class KafkaConfig {
     private String bootstrapServers;
 
     @Bean
-    public ConsumerFactory<String, NotificationEvent> consumerFactory() {
-        JsonDeserializer<NotificationEvent> deserializer = new JsonDeserializer<>(NotificationEvent.class);
+    public ProducerFactory<String, NotificationEvent> producerFactory() {
+        JsonSerializer<NotificationEvent> serializer = new JsonSerializer<>(NotificationEvent.class);
         deserializer.setRemoveTypeHeaders(false);
         deserializer.addTrustedPackages("me.tainj.notification.model");
 
@@ -33,31 +34,11 @@ public class KafkaConfig {
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
-        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), deserializer);
+        return new DefaultKafkaProducerFactory<>(props, new StringSerializer(), serializer);
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, NotificationEvent> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, NotificationEvent> factory =
-                new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactory());
-        factory.setConcurrency(3);
-        return factory;
-    }
-
-    @Bean
-    public NewTopic telegramTopic() {
-        return TopicBuilder.name("telegram-notifications")
-                .partitions(3)
-                .replicas(1)
-                .build();
-    }
-
-    @Bean
-    public NewTopic websocketTopic() {
-        return TopicBuilder.name("websocket-notifications")
-                .partitions(3)
-                .replicas(1)
-                .build();
+    public KafkaTemplate<String, String> kafkaTemplate() {
+        return new KafkaTemplate<>(producerFactory());
     }
 }
