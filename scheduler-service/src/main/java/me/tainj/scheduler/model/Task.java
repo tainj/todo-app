@@ -28,4 +28,15 @@ public class Task {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    public NotificationEvent toEvent() {
+        NotificationEvent event = new NotificationEvent();
+        event.setTaskId(id);
+        event.setUserId(user.getId());
+        event.setChatId(user.getTelegramChatId());
+        event.setTaskTitle(title);
+        event.setMessage(description);
+        event.setDueDate(createdAt.toLocalDateTime());
+        return event;
+    }
 }

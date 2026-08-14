@@ -14,6 +14,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import java.time.Duration;
 
+
 @Service
 public class TelegramService extends TelegramLongPollingBot {
     private final UserRepository userRepository;
@@ -43,16 +44,46 @@ public class TelegramService extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
+        log.info("=== ВХОДЯЩЕЕ ОБНОВЛЕНИЕ ===");
+        if (update.hasMessage() && update.getMessage().hasText()) {
+            String text = update.getMessage().getText();
+            Long chatId = update.getMessage().getChatId();
+            log.info("Текст: '{}', chatId: {}", text, chatId);
+        } else {
+            log.info("Обновление не содержит текстового сообщения");
+        }
         Long chatId = update.getMessage().getChatId();
         String text = update.getMessage().getText();
+        String username = update.getMessage().getFrom().getUserName();
+
+        // Это главная строка — выводим ВСЁ, что пришло
+        log.info("Получено сообщение от @{} (chatId={}): '{}'", username, chatId, text);
+
+
         if (text.startsWith("/start ")) {
             String token = text.substring(7);
-            String userId = redisTemplate.opsForValue().get("telegram:link:" + token);
+
+            String userId = redisTemplate.opsForValue()
+                    .get("telegram:link:" + token);
+
             if (userId != null) {
-                User user = userRepository.findById(Long.parseLong(userId)).orElseThrow();
+                User user = userRepository
+                        .findById(Long.parseLong(userId))
+                        .orElseThrow();
+
                 user.setTelegramChatId(chatId);
                 userRepository.save(user);
+
                 redisTemplate.delete("telegram:link:" + token);
+
+                SendMessage message = new SendMessage();
+                message.setChatId(chatId);
+                message.setText("✅ Telegram успешно привязан!");
+                try {
+                    execute(message);
+                } catch (TelegramApiException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
