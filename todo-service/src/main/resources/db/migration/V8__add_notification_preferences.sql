@@ -1,0 +1,6 @@
+ALTER TABLE tasks ADD COLUMN deadline TIMESTAMPTZ;
+ALTER TABLE tasks ADD COLUMN reminder_offsets INTEGER[]; -- {60, 15}
+ALTER TABLE tasks ADD COLUMN recurrence VARCHAR(20) DEFAULT 'NONE'; -- NONE/DAILY/WEEKLY
+ALTER TABLE tasks ADD COLUMN recurrence_days INTEGER[];
+ALTER TABLE users ADD COLUMN notify_telegram BOOLEAN DEFAULT false;
+ALTER TABLE users ADD COLUMN notify_websocket BOOLEAN DEFAULT true;

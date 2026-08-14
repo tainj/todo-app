@@ -1,14 +1,13 @@
 package me.tainj.scheduler.repository;
 
-import me.tainj.scheduler.Task;
-import me.tainj.todo.model.User;
+import me.tainj.scheduler.model.Task;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import java.time.OffsetDateTime;
 import java.util.List;
 
-
-@Repository
 public interface TaskRepository extends JpaRepository<Task, Long> {
-    List<Task> findByUser(User user);
+    @Query("SELECT t FROM Task t WHERE t.createdAt <= :now AND t.user.telegramChatId IS NOT NULL")
+    List<Task> findOverdueTasks(@Param("now") OffsetDateTime now);
 }
-

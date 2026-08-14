@@ -1,4 +1,4 @@
-package me.tainj.notification.config;
+package me.tainj.scheduler.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 public class NotificationEvent {
     private Long taskId;
     private Long userId;
-    private String chatId;
+    private Long chatId;
     private String taskTitle;
     private String message;
     private LocalDateTime dueDate;
