@@ -3,10 +3,7 @@ package me.tainj.todo.service;
 import me.tainj.todo.dto.request.CreateCategoryRequest;
 import me.tainj.todo.dto.request.UpdateCategoryRequest;
 import me.tainj.todo.dto.response.CategoryResponse;
-import me.tainj.todo.exception.AccessDeniedException;
-import me.tainj.todo.exception.CategoryNotFoundException;
-import me.tainj.todo.exception.DefaultCategoryException;
-import me.tainj.todo.exception.UserNotFoundException;
+import me.tainj.todo.exception.*;
 import me.tainj.todo.model.Category;
 import me.tainj.todo.model.User;
 import me.tainj.todo.repository.CategoryRepository;
@@ -48,24 +45,24 @@ public class CategoryService {
 
     public void delete(Long id, String username) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new CategoryNotFoundException("category not found"));
+                .orElseThrow(() -> new CategoryNotFoundException(ErrorMessages.CATEGORY_NOT_FOUND));
         if (category.isDefault()) {
-            throw new DefaultCategoryException("cannot delete default category");
+            throw new DefaultCategoryException(ErrorMessages.DEFAULT_CATEGORY);
         }
         if (!category.getUser().getUsername().equals(username)) {
-            throw new AccessDeniedException("access denied");
+            throw new AccessDeniedException(ErrorMessages.ACCESS_DENIED);
         }
         categoryRepository.deleteById(id);
     }
 
     public CategoryResponse update(Long id, UpdateCategoryRequest updateCategoryRequest, String username) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new CategoryNotFoundException("category not found"));
+                .orElseThrow(() -> new CategoryNotFoundException(ErrorMessages.CATEGORY_NOT_FOUND));
         if (category.isDefault()) {
-            throw new DefaultCategoryException("cannot update default category");
+            throw new DefaultCategoryException(ErrorMessages.DEFAULT_CATEGORY);
         }
         if (!category.getUser().getUsername().equals(username)) {
-            throw new AccessDeniedException("access denied");
+            throw new AccessDeniedException(ErrorMessages.ACCESS_DENIED);
         }
         category.setName(updateCategoryRequest.name());
         return categoryRepository.save(category).toResponse();

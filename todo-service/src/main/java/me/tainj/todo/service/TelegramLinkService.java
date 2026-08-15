@@ -1,6 +1,7 @@
 package me.tainj.todo.service;
 
 import me.tainj.todo.dto.response.TelegramLinkResponse;
+import me.tainj.todo.exception.ErrorMessages;
 import me.tainj.todo.exception.UserNotFoundException;
 import me.tainj.todo.model.User;
 import me.tainj.todo.repository.UserRepository;
@@ -32,7 +33,7 @@ public class TelegramLinkService {
         String url = "https://t.me/" + botUsername + "?start=" + token;
         String key = "telegram:link:" + token;
 
-        User user = userRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException("user not found"));
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException(ErrorMessages.USER_NOT_FOUND));
         String userId = String.valueOf(user.getId());
 
         try {

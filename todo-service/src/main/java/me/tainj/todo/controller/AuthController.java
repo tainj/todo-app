@@ -24,12 +24,16 @@ public class AuthController {
     public UserResponse register(@RequestBody RegisterRequest request) {
         User user = userService.register(
                 request.username(),
-                request.password()
+                request.password(),
+                request.notifyTelegram(),
+                request.notifyWebsocket()
         );
 
         return new UserResponse(
                 user.getId(),
-                user.getUsername()
+                user.getUsername(),
+                user.isNotifyTelegram(),
+                user.isNotifyWebsocket()
         );
     }
 
