@@ -13,6 +13,7 @@ public class NotificationEvent {
     private LocalDateTime dueDate;
     private NotificationType type;
     private String categoryName;
+    private int minuteBefore;
 
     public enum NotificationType {
         TELEGRAM, WEBSOCKET

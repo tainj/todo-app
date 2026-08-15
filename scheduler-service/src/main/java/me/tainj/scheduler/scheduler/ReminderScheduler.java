@@ -15,6 +15,6 @@ public class ReminderScheduler {
 
     @Scheduled(fixedRate = 60000) // каждую минуту
     public void checkReminders() {
-        reminderService.processOverdueTasks();
+        reminderService.processReminders();
     }
 }

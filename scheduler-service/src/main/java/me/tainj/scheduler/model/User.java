@@ -18,4 +18,10 @@ public class User {
 
     @Column(name = "telegram_chat_id")
     private Long telegramChatId;
+
+    @Column(name = "notify_telegram")
+    private boolean notifyTelegram = false;
+
+    @Column(name = "notify_websocket")
+    private boolean notifyWebsocket = true;
 }
