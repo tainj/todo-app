@@ -33,11 +33,13 @@ public class TaskController {
     }
 
     @GetMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
     public TaskResponse getTask(Authentication authentication, @PathVariable Long id) {
         return taskService.getTask(id, getCurrentUsername(authentication));
     }
 
     @PutMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
     public TaskResponse update(Authentication authentication, @PathVariable Long id, @RequestBody UpdateTaskRequest task) {
         return taskService.update(id, task, getCurrentUsername(authentication));
     }
