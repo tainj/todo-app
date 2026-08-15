@@ -24,8 +24,8 @@ cd notification-service
 export $(cat ../.env | xargs) && mvn spring-boot:run
 ```
 
-### scheduler-service
-```bash
+    ### scheduler-service
+    ```bash
 cd scheduler-service
 export $(cat ../.env | xargs) && mvn spring-boot:run
 ```

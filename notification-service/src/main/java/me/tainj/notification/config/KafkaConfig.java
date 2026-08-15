@@ -19,6 +19,11 @@ import java.util.Map;
 
 @Configuration
 public class KafkaConfig {
+    @Value("${kafka.partitions}")
+    private int partitions;
+
+    @Value("${kafka.replicas}")
+    private int replicas;
 
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
@@ -49,16 +54,16 @@ public class KafkaConfig {
     @Bean
     public NewTopic telegramTopic() {
         return TopicBuilder.name("telegram-notifications")
-                .partitions(3)
-                .replicas(1)
+                .partitions(partitions)
+                .replicas(replicas)
                 .build();
     }
 
     @Bean
     public NewTopic websocketTopic() {
         return TopicBuilder.name("websocket-notifications")
-                .partitions(3)
-                .replicas(1)
+                .partitions(partitions)
+                .replicas(replicas)
                 .build();
     }
 }
