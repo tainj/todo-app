@@ -1,5 +1,6 @@
 package me.tainj.todo.service;
 
+import me.tainj.todo.exception.ErrorMessages;
 import me.tainj.todo.exception.InvalidPasswordException;
 import me.tainj.todo.exception.UserNotFoundException;
 import me.tainj.todo.model.User;
@@ -21,7 +22,7 @@ public class UserService {
 
     public User register(String username, String password) {
         if (userRepository.findByUsername(username).isPresent()) {
-            throw new IllegalArgumentException("username already taken");
+            throw new IllegalArgumentException(ErrorMessages.USERNAME_TAKEN);
         }
         User user = new User();
         user.setUsername(username);
@@ -33,7 +34,7 @@ public class UserService {
     public String login(String username, String password) {
         User user = this.userRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException("user not found"));
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new InvalidPasswordException("invalid password");
+            throw new InvalidPasswordException(ErrorMessages.INVALID_PASSWORD);
         }
         return jwtService.generateToken(username);
     }

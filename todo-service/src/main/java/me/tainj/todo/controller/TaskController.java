@@ -48,7 +48,7 @@ public class TaskController {
         taskService.delete(id, getCurrentUsername(authentication));
     }
 
-    private String getCurrentUsername(Authentication authentication) {
+    private String getCurrentUsername(Authentication authentication)     {
         return authentication.getName();
     }
 }

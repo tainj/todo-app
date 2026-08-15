@@ -4,6 +4,7 @@ import me.tainj.todo.dto.request.CreateTaskRequest;
 import me.tainj.todo.dto.request.UpdateTaskRequest;
 import me.tainj.todo.dto.response.TaskResponse;
 import me.tainj.todo.exception.AccessDeniedException;
+import me.tainj.todo.exception.ErrorMessages;
 import me.tainj.todo.exception.TaskNotFoundException;
 import me.tainj.todo.exception.UserNotFoundException;
 import me.tainj.todo.model.Task;
@@ -43,18 +44,18 @@ public class TaskService {
 
     public TaskResponse getTask(Long id, String username) {
         Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new TaskNotFoundException("task not found"));
+                .orElseThrow(() -> new TaskNotFoundException(ErrorMessages.TASK_NOT_FOUND));
         if (!task.getUser().getUsername().equals(username)) {
-            throw new AccessDeniedException("access denied");
+            throw new AccessDeniedException(ErrorMessages.ACCESS_DENIED);
         }
         return task.toResponse();
     }
 
         public TaskResponse update(Long id, UpdateTaskRequest updated, String username) {
             Task task = taskRepository.findById(id)
-                    .orElseThrow(() -> new TaskNotFoundException("task not found"));
+                    .orElseThrow(() -> new TaskNotFoundException(ErrorMessages.TASK_NOT_FOUND));
             if (!task.getUser().getUsername().equals(username)) {
-                throw new AccessDeniedException("access denied");
+                throw new AccessDeniedException(ErrorMessages.ACCESS_DENIED);
             }
             task.setTitle(updated.title());
             task.setDescription(updated.description());
@@ -64,9 +65,9 @@ public class TaskService {
 
     public void delete(Long id, String username) {
         Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new TaskNotFoundException("task not found"));
+                .orElseThrow(() -> new TaskNotFoundException(ErrorMessages.TASK_NOT_FOUND));
         if (!task.getUser().getUsername().equals(username)) {
-            throw new AccessDeniedException("access denied");
+            throw new AccessDeniedException(ErrorMessages.ACCESS_DENIED);
         }
         taskRepository.deleteById(id);
     }
