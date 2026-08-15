@@ -47,7 +47,9 @@ public class Task {
     private Category category;
 
     public TaskResponse toResponse() {
-        return new TaskResponse(id, title, description, completed, createdAt, deadline, reminderOffsets, recurrence);
+        return new TaskResponse(id, title, description, completed, createdAt, deadline, reminderOffsets, recurrence,
+                category != null ? category.getId() : null,
+                category != null ? category.getName() : null);
     }
 
     public enum Recurrence {

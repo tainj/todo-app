@@ -50,6 +50,17 @@ public class TaskController {
         taskService.delete(id, getCurrentUsername(authentication));
     }
 
+    @PatchMapping("/{id}/complete")
+    @ResponseStatus(HttpStatus.OK)
+    public TaskResponse complete(Authentication authentication, @PathVariable Long id) {
+        return taskService.complete(id, getCurrentUsername(authentication));
+    }
+
+    @GetMapping("/history")
+    public List<TaskResponse> getHistory(Authentication authentication) {
+        return taskService.getHistory(getCurrentUsername(authentication));
+    }
+
     private String getCurrentUsername(Authentication authentication)     {
         return authentication.getName();
     }

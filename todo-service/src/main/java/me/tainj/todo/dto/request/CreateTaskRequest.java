@@ -9,6 +9,7 @@ import java.util.List;
 public record CreateTaskRequest(
         String title,
         String description,
+        @JsonProperty("category_id") Long categoryId,
         @JsonProperty("deadline") OffsetDateTime deadline,
         @JsonProperty("reminder_offsets") List<Integer> reminderOffsets,
         @JsonProperty("recurrence") Task.Recurrence recurrence

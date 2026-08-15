@@ -31,6 +31,10 @@ public class Task {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
+
     @Column(name = "deadline")
     private OffsetDateTime deadline;
 
@@ -51,6 +55,7 @@ public class Task {
         event.setTaskId(id);
         event.setUserId(user.getId());
         event.setChatId(user.getTelegramChatId());
+        event.setCategoryName(category != null ? category.getName() : null);
         event.setTaskTitle(title);
         event.setTaskDescription(description);
         event.setDueDate(deadline != null ? deadline.toLocalDateTime() : null);

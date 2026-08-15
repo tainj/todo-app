@@ -10,6 +10,8 @@ import java.util.List;
 public interface TaskRepository extends JpaRepository<Task, Long> {
     @Query("""
     SELECT t FROM Task t
+    JOIN FETCH t.user
+    LEFT JOIN FETCH t.category
     WHERE t.deadline IS NOT NULL
     AND t.completed = false
     AND t.user.telegramChatId IS NOT NULL

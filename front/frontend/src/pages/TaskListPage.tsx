@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useMemo, useState, useEffect, useCallback } from "react"
 import { ClipboardList, Plus, RefreshCw } from "lucide-react"
 import { useData } from "../context/DataContext"
 import { GROUP_LABELS, GROUP_ORDER, groupForDeadline, type DeadlineGroup } from "../lib/date"
@@ -8,20 +8,26 @@ import { Button, Spinner } from "../components/ui"
 import { haptic } from "../lib/telegram"
 
 export function TaskListPage({ onCreate }: { onCreate: () => void }) {
-  const { tasks, categories, loading, error, refresh, completeTask, deleteTask } = useData()
+  const { tasks, history, categories, loading, error, refresh, loadHistory, completeTask, deleteTask } = useData()
   const [categoryFilter, setCategoryFilter] = useState<number | "all">("all")
   const [showCompleted, setShowCompleted] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
 
   const categoryMap = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories])
 
+  useEffect(() => {
+    if (showCompleted) void loadHistory()
+  }, [showCompleted, loadHistory])
+
+  const allTasks = useMemo(() => showCompleted ? [...tasks, ...history] : tasks, [tasks, history, showCompleted])
+
   const filtered = useMemo(() => {
-    return tasks.filter((t) => {
+    return allTasks.filter((t) => {
       if (!showCompleted && t.completed) return false
       if (categoryFilter !== "all" && t.category_id !== categoryFilter) return false
       return true
     })
-  }, [tasks, categoryFilter, showCompleted])
+  }, [allTasks, categoryFilter, showCompleted])
 
   const grouped = useMemo(() => {
     const map = new Map<DeadlineGroup, Task[]>()
@@ -47,6 +53,7 @@ export function TaskListPage({ onCreate }: { onCreate: () => void }) {
     setRefreshing(true)
     haptic("light")
     await refresh()
+    if (showCompleted) await loadHistory()
     setRefreshing(false)
   }
 
