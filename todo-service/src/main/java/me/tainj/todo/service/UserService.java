@@ -46,7 +46,7 @@ public class UserService {
         User user = userRepository.findByUsername(username).orElseThrow(() -> new UserNotFoundException(ErrorMessages.USER_NOT_FOUND));
         user.setNotifyTelegram(notifyTelegram);
         user.setNotifyWebsocket(notifyWebsocket);
-        return user.toResponse();
+        return userRepository.save(user).toResponse();
     }
 
     public UserResponse getMe(String username) {

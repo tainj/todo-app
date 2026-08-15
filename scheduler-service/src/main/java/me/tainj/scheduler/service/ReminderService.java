@@ -24,18 +24,35 @@ public class ReminderService {
         this.taskRepository = taskRepository;
     }
 
-    public void processOverdueTasks() {
-        List<Task> tasks = taskRepository.findOverdueTasks(OffsetDateTime.now());
+    public void processReminders() {
+        OffsetDateTime now = OffsetDateTime.now();
+        List<Task> tasks = taskRepository.findTasksWithDeadlineBetween(now, now.plusMinutes(1440));
+
         for (Task task : tasks) {
-            String key = "reminder:sent:" + task.getId();
-            if (Boolean.TRUE.equals(redisTemplate.hasKey(key))) {
-                continue;
+            if (task.getReminderOffsets() == null) continue;
+
+            for (int offset : task.getReminderOffsets()) {
+                OffsetDateTime reminderTime = task.getDeadline().minusMinutes(offset);
+
+                if (reminderTime.isBefore(now.minusMinutes(1)) || reminderTime.isAfter(now.plusMinutes(1))) {
+                    continue;
+                }
+
+                String key = "reminder:" + task.getId() + ":" + offset;
+                if (Boolean.TRUE.equals(redisTemplate.hasKey(key))) continue;
+
+                NotificationEvent event = task.toEvent();
+                event.setMinuteBefore(offset);
+
+                if (Boolean.TRUE.equals(task.getUser().isNotifyTelegram())) {
+                    notificationProducer.sendTelegram(event);
+                }
+                if (Boolean.TRUE.equals(task.getUser().isNotifyWebsocket())) {
+                    notificationProducer.sendWebSocket(event);
+                }
+
+                redisTemplate.opsForValue().set(key, "sent", Duration.ofMinutes(offset + 5));
             }
-            NotificationEvent event = task.toEvent();
-            notificationProducer.sendTelegram(event);
-            notificationProducer.sendWebSocket(event);
-            redisTemplate.opsForValue().set(key, "sent", Duration.ofHours(24));
         }
     }
 }
-

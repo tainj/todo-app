@@ -39,6 +39,9 @@ public class TaskService {
         task.setTitle(request.title());
         task.setDescription(request.description());
         task.setUser(user);
+        task.setDeadline(request.deadline());
+        task.setReminderOffsets(request.reminderOffsets());
+        task.setRecurrence(request.recurrence() != null ? request.recurrence() : Task.Recurrence.NONE);
         return taskRepository.save(task).toResponse();
     }
 

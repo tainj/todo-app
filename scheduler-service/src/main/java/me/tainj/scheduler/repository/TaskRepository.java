@@ -8,6 +8,15 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 public interface TaskRepository extends JpaRepository<Task, Long> {
-    @Query("SELECT t FROM Task t WHERE t.createdAt <= :now AND t.user.telegramChatId IS NOT NULL")
-    List<Task> findOverdueTasks(@Param("now") OffsetDateTime now);
+    @Query("""
+    SELECT t FROM Task t
+    WHERE t.deadline IS NOT NULL
+    AND t.completed = false
+    AND t.user.telegramChatId IS NOT NULL
+    AND t.deadline BETWEEN :from AND :to
+    """)
+    List<Task> findTasksWithDeadlineBetween(
+            @Param("from") OffsetDateTime from,
+            @Param("to") OffsetDateTime to
+    );
 }

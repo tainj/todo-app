@@ -9,6 +9,13 @@ public class NotificationEvent {
     private Long userId;
     private Long chatId;
     private String taskTitle;
-    private String message;
+    private String taskDescription;
     private LocalDateTime dueDate;
+    private NotificationType type;
+    private String categoryName;
+    private int minuteBefore;
+
+    public enum NotificationType {
+        TELEGRAM, WEBSOCKET
+    }
 }
