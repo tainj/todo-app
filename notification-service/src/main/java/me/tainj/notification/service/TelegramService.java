@@ -3,6 +3,7 @@ package me.tainj.notification.service;
 import me.tainj.notification.model.NotificationEvent;
 import me.tainj.notification.model.User;
 import me.tainj.notification.repository.UserRepository;
+import me.tainj.notification.util.TelegramMessages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -91,7 +92,7 @@ public class TelegramService extends TelegramLongPollingBot {
     public void send(NotificationEvent event) {
         SendMessage message = new SendMessage();
         message.setChatId(event.getChatId());
-        message.setText(event.getMessage());
+        message.setText(TelegramMessages.createMessage(event));
 
         String key = "notification:sent:" + event.getTaskId();
         if (redisTemplate.hasKey(key)) {

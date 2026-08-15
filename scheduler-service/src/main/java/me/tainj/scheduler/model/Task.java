@@ -2,6 +2,8 @@ package me.tainj.scheduler.model;
 
 import jakarta.persistence.*;
 import java.time.OffsetDateTime;
+import java.util.List;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -29,14 +31,29 @@ public class Task {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Column(name = "deadline")
+    private OffsetDateTime deadline;
+
+    @Column(name = "reminder_offsets", columnDefinition = "integer[]")
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.ARRAY)
+    private List<Integer> reminderOffsets;
+
+    @Column(name = "recurrence", length = 20)
+    @Enumerated(EnumType.STRING)
+    private Recurrence recurrence = Recurrence.NONE;
+
+    public enum Recurrence {
+        NONE, DAILY, WEEKLY
+    }
+
     public NotificationEvent toEvent() {
         NotificationEvent event = new NotificationEvent();
         event.setTaskId(id);
         event.setUserId(user.getId());
         event.setChatId(user.getTelegramChatId());
         event.setTaskTitle(title);
-        event.setMessage(description);
-        event.setDueDate(createdAt.toLocalDateTime());
+        event.setTaskDescription(description);
+        event.setDueDate(deadline != null ? deadline.toLocalDateTime() : null);
         return event;
     }
 }
