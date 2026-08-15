@@ -1,0 +1,11 @@
+{
+  "name": "telegram-todo",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --dir frontend dev",
+    "build": "pnpm --dir frontend build",
+    "preview": "pnpm --dir frontend preview",
+    "install:frontend": "pnpm --dir frontend install"
+  }
+}
