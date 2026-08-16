@@ -19,6 +19,7 @@ export interface Category {
 export interface User {
   id: number
   username: string
+  telegram_chat_id?: number | null
   notify_telegram: boolean
   notify_websocket: boolean
 }

@@ -4,6 +4,9 @@ import me.tainj.scheduler.model.NotificationEvent;
 import me.tainj.scheduler.model.Task;
 import me.tainj.scheduler.producer.NotificationProducer;
 import me.tainj.scheduler.repository.TaskRepository;
+import me.tainj.scheduler.scheduler.ReminderScheduler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +17,7 @@ import java.util.List;
 
 @Service
 public class ReminderService {
+    private static final Logger log = LoggerFactory.getLogger(ReminderService.class);
     private final RedisTemplate<String, String> redisTemplate;
     private final NotificationProducer notificationProducer;
     private final TaskRepository taskRepository;
@@ -27,13 +31,15 @@ public class ReminderService {
     public void processReminders() {
         OffsetDateTime now = OffsetDateTime.now();
         List<Task> tasks = taskRepository.findTasksWithDeadlineBetween(now, now.plusMinutes(1440));
+        log.info("Found {} tasks, now={}", tasks.size(), now);
 
         for (Task task : tasks) {
+
             if (task.getReminderOffsets() == null) continue;
 
             for (int offset : task.getReminderOffsets()) {
                 OffsetDateTime reminderTime = task.getDeadline().minusMinutes(offset);
-
+                log.info("taskId={}, offset={}, reminderTime={}, now={}", task.getId(), offset, reminderTime, now);
                 if (reminderTime.isBefore(now.minusMinutes(1)) || reminderTime.isAfter(now.plusMinutes(1))) {
                     continue;
                 }

@@ -16,6 +16,8 @@ public record TaskResponse(
         @JsonProperty("created_at") OffsetDateTime createdAt,
         OffsetDateTime deadline,
         @JsonProperty("reminder_offsets") List<Integer> reminderOffsets,
-        Task.Recurrence recurrence
+        Task.Recurrence recurrence,
+        @JsonProperty("category_id") Long categoryId,
+        @JsonProperty("category_name") String categoryName
 ) {
 }

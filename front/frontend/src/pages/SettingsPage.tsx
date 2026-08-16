@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Bell, LogOut, Radio, Trash2, User as UserIcon } from "lucide-react"
+import { Bell, LogOut, Radio, Trash2, User as UserIcon, Send } from "lucide-react"
 import { useAuth } from "../context/AuthContext"
 import { useData } from "../context/DataContext"
 import { api, ApiError } from "../lib/api"
@@ -15,23 +15,16 @@ export function SettingsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [savingKey, setSavingKey] = useState<"notify_telegram" | "notify_websocket" | null>(null)
+  const [connectingTg, setConnectingTg] = useState(false)
 
   useEffect(() => {
     let active = true
     api
       .getMe()
-      .then((u) => {
-        if (active) setUser(u)
-      })
-      .catch((err) => {
-        if (active) setError(err instanceof ApiError ? err.message : "Failed to load profile")
-      })
-      .finally(() => {
-        if (active) setLoading(false)
-      })
-    return () => {
-      active = false
-    }
+      .then((u) => { if (active) setUser(u) })
+      .catch((err) => { if (active) setError(err instanceof ApiError ? err.message : "Failed to load profile") })
+      .finally(() => { if (active) setLoading(false) })
+    return () => { active = false }
   }, [])
 
   async function toggle(key: "notify_telegram" | "notify_websocket") {
@@ -48,11 +41,24 @@ export function SettingsPage() {
       setUser(updated ?? next)
       notify("success")
     } catch (err) {
-      setUser(user) // revert
+      setUser(user)
       notify("error")
       setError(err instanceof ApiError ? err.message : "Could not save settings")
     } finally {
       setSavingKey(null)
+    }
+  }
+
+  async function connectTelegram() {
+    setConnectingTg(true)
+    haptic("light")
+    try {
+      const { url } = await api.getTelegramLink()
+      window.location.href = url
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "Could not get Telegram link")
+    } finally {
+      setConnectingTg(false)
     }
   }
 
@@ -86,9 +92,23 @@ export function SettingsPage() {
                 <p className="truncate text-[16px] font-semibold text-foreground">
                   {user?.username ?? "Account"}
                 </p>
-                <p className="text-[13px] text-muted">Signed in</p>
+                <p className="text-[13px] text-muted">
+                  {user?.telegram_chat_id ? "Telegram connected ✓" : "Telegram not connected"}
+                </p>
               </div>
             </section>
+
+            {!user?.telegram_chat_id && (
+              <button
+                type="button"
+                onClick={connectTelegram}
+                disabled={connectingTg}
+                className="flex items-center justify-center gap-2 rounded-[var(--radius)] bg-accent px-4 py-3.5 text-[15px] font-medium text-accent-foreground active:opacity-80"
+              >
+                <Send className="h-5 w-5" />
+                {connectingTg ? "Opening..." : "Connect Telegram"}
+              </button>
+            )}
 
             <section>
               <h2 className="mb-2 px-1 text-[13px] font-semibold uppercase tracking-wide text-muted">
@@ -102,7 +122,6 @@ export function SettingsPage() {
                   checked={user?.notify_telegram ?? false}
                   busy={savingKey === "notify_telegram"}
                   onChange={() => toggle("notify_telegram")}
-
                 />
                 <div className="mx-4 h-px bg-border" />
                 <ToggleRow
@@ -154,10 +173,7 @@ export function SettingsPage() {
 
             <button
               type="button"
-              onClick={() => {
-                haptic("medium")
-                logout()
-              }}
+              onClick={() => { haptic("medium"); logout() }}
               className="flex items-center justify-center gap-2 rounded-[var(--radius)] bg-surface px-4 py-3.5 text-[15px] font-medium text-danger active:bg-surface-elevated"
             >
               <LogOut className="h-5 w-5" />
@@ -171,12 +187,7 @@ export function SettingsPage() {
 }
 
 function ToggleRow({
-  icon,
-  label,
-  description,
-  checked,
-  busy,
-  onChange,
+  icon, label, description, checked, busy, onChange,
 }: {
   icon: React.ReactNode
   label: string
@@ -199,19 +210,15 @@ function ToggleRow({
         aria-label={label}
         disabled={busy}
         onClick={onChange}
-        className={
-          checked
-            ? "relative h-7 w-12 flex-shrink-0 rounded-full bg-accent transition-colors"
-            : "relative h-7 w-12 flex-shrink-0 rounded-full bg-surface-elevated transition-colors"
+        className={checked
+          ? "relative h-7 w-12 flex-shrink-0 rounded-full bg-accent transition-colors"
+          : "relative h-7 w-12 flex-shrink-0 rounded-full bg-surface-elevated transition-colors"
         }
       >
-        <span
-          className={
-            checked
-              ? "absolute top-1 h-5 w-5 translate-x-0 rounded-full bg-accent-foreground transition-transform"
-              : "absolute top-1 h-5 w-5 -translate-x-5 rounded-full bg-muted transition-transform"
-          }
-        />
+        <span className={checked
+          ? "absolute top-1 h-5 w-5 translate-x-0 rounded-full bg-accent-foreground transition-transform"
+          : "absolute top-1 h-5 w-5 -translate-x-5 rounded-full bg-muted transition-transform"
+        } />
       </button>
     </div>
   )

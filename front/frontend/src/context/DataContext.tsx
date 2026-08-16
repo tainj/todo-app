@@ -4,10 +4,12 @@ import type { Category, NewTask, Task } from "../lib/types"
 
 interface DataContextValue {
   tasks: Task[]
+  history: Task[]
   categories: Category[]
   loading: boolean
   error: string | null
   refresh: () => Promise<void>
+  loadHistory: () => Promise<void>
   createTask: (task: NewTask) => Promise<void>
   completeTask: (id: number) => Promise<void>
   deleteTask: (id: number) => Promise<void>
@@ -19,9 +21,15 @@ const DataContext = createContext<DataContextValue | null>(null)
 
 export function DataProvider({ children }: { children: ReactNode }) {
   const [tasks, setTasks] = useState<Task[]>([])
+  const [history, setHistory] = useState<Task[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  const loadHistory = useCallback(async () => {
+    const h = await api.getHistory()
+    setHistory(Array.isArray(h) ? h : [])
+  }, [])
 
   const refresh = useCallback(async () => {
     setError(null)
@@ -49,15 +57,15 @@ export function DataProvider({ children }: { children: ReactNode }) {
   )
 
   const completeTask = useCallback(async (id: number) => {
-    // Optimistic update
     setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, completed: true } : t)))
     try {
       await api.completeTask(id)
+      await refresh()
     } catch {
       setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, completed: false } : t)))
       throw new Error("Could not complete task")
     }
-  }, [])
+  }, [refresh])
 
   const deleteTask = useCallback(async (id: number) => {
     const snapshot = await new Promise<Task[]>((resolve) => {
@@ -88,17 +96,19 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const value = useMemo<DataContextValue>(
     () => ({
       tasks,
+      history,
       categories,
       loading,
       error,
       refresh,
+      loadHistory,
       createTask,
       completeTask,
       deleteTask,
       createCategory,
       deleteCategory,
     }),
-    [tasks, categories, loading, error, refresh, createTask, completeTask, deleteTask, createCategory, deleteCategory],
+    [tasks, history, categories, loading, error, refresh, loadHistory, createTask, completeTask, deleteTask, createCategory, deleteCategory],
   )
 
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>

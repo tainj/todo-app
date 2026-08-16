@@ -80,6 +80,7 @@ export const api = {
     request<Task>(`/tasks/${id}`, { method: "PUT", body: JSON.stringify(task) }),
   deleteTask: (id: number) => request<void>(`/tasks/${id}`, { method: "DELETE" }),
   completeTask: (id: number) => request<Task>(`/tasks/${id}/complete`, { method: "PATCH" }),
+  getHistory: () => request<Task[]>("/tasks/history"),
 
   // Categories
   getCategories: () => request<Category[]>("/categories"),
@@ -88,6 +89,7 @@ export const api = {
   deleteCategory: (id: number) => request<void>(`/categories/${id}`, { method: "DELETE" }),
 
   // Users
+  getTelegramLink: () => request<{ url: string }>("/telegram"),
   getMe: () => request<User>("/users/me"),
   updateSettings: (settings: UserSettings) =>
     request<User>("/users/settings", { method: "PATCH", body: JSON.stringify(settings) }),
