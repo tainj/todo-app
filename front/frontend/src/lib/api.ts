@@ -89,6 +89,7 @@ export const api = {
   deleteCategory: (id: number) => request<void>(`/categories/${id}`, { method: "DELETE" }),
 
   // Users
+  getTelegramLink: () => request<{ url: string }>("/telegram"),
   getMe: () => request<User>("/users/me"),
   updateSettings: (settings: UserSettings) =>
     request<User>("/users/settings", { method: "PATCH", body: JSON.stringify(settings) }),
