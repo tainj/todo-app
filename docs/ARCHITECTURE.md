@@ -247,8 +247,3 @@ For local development, a single Docker Compose file brings up all dependencies a
 - JWT tokens are used for user authentication; they are passed via HTTP headers.
 - Telegram bot token is stored as an environment variable and never logged.
 
----
-
-## Further Reading
-
-- [License](./LICENSE)
