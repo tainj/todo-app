@@ -1,1 +1,71 @@
-Nothing should be ignored in this case, as the changes only include source/config files (LICENSE, README.md, docs/README.md) and the deletion of a readme file. No build artifacts, dependencies, or temporary files are present in the change list.
+# Compiled class file
+*.class
+
+# Log file
+*.log
+
+# BlueJ files
+*.ctxt
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# virtual machine crash logs, see http://java.com
+hs_err_pid*
+replay_pid*
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+release.properties
+dependency-reduced-pom.xml
+build-number.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Gradle
+build/
+.gradle/
+gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.jar
+
+# IntelliJ IDEA
+.idea/
+.idea/modules.xml
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/dictionaries/
+.idea/runConfigurations/
+*.iml
+*.iws
+
+# Eclipse
+.settings/
+.project
+.classpath
+.metadata/
+
+# NetBeans
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# VS Code
+.vscode/
+
+# OS X системные файлы
+.DS_Store
+
+# Environmet variables
+.env

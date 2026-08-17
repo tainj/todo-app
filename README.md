@@ -1,339 +1,113 @@
-# Todo Application
+<h1 align="center">Todo Application</h1>
 
-Микросервисное приложение для управления задачами с уведомлениями через Telegram и WebSocket.
+<p align="center">
+  <a href="https://github.com/tainj/todo-app/actions">
+    <img src="https://img.shields.io/github/actions/workflow/status/tainj/todo-app/ci.yml?branch=main&style=flat-square" alt="Build Status">
+  </a>
+  <a href="https://adoptium.net/">
+    <img src="https://img.shields.io/badge/Java-17-blue?style=flat-square&logo=openjdk" alt="Java 17">
+  </a>
+  <a href="https://spring.io/projects/spring-boot">
+    <img src="https://img.shields.io/badge/Spring%20Boot-3.x-6db33f?style=flat-square&logo=spring" alt="Spring Boot">
+  </a>
+  <a href="LICENSE">
+    <img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square" alt="License MIT">
+  </a>
+  <a href="#">
+    <img src="https://img.shields.io/badge/Status-Under%20Development-orange?style=flat-square" alt="Project Status">
+  </a>
 
-## 📋 Содержание
+</p>
 
-- [Архитектура](#архитектура)
-- [Сервисы](#сервисы)
-- [Быстрый старт](#быстрый-старт)
-  - [Запуск через Docker Compose](#запуск-через-docker-compose)
-  - [Локальная разработка](#локальная-разработка)
-- [Взаимодействие сервисов](#взаимодействие-сервисов)
-- [Релизы](#релизы)
-- [Лицензия](#лицензия)
+A microservice-based task management system with Telegram and WebSocket notifications.
 
-## 🏗️ Архитектура
+## 📖 Overview
 
-Приложение построено по микросервисной архитектуре и состоит из следующих компонентов:
+This project helps users manage tasks, set reminders, and receive notifications via Telegram and real‑time WebSocket updates.  
+Built with Spring Boot, PostgreSQL, Kafka, Redis, and a modern TypeScript frontend.
 
+## 🏗️ Architecture (simplified)
+
+```mermaid
+flowchart TB
+    FE[Frontend] --> NG[Nginx]
+    NG --> Todo[Todo Service]
+    NG --> Notif[Notification Service]
+    Todo --> PG[(PostgreSQL)]
+    Notif --> PG
+    Scheduler[Scheduler Service] --> PG
+    Scheduler --> Kafka[Apache Kafka]
+    Notif --> Kafka
+    Notif --> Redis[(Redis)]
+    Todo --> Redis
+    Scheduler --> Redis
+    Notif --> TG[Telegram API]
+    Notif --> WS[WebSocket]
 ```
-┌─────────────┐     ┌──────────────────┐     ┌────────────────────┐
-│   Frontend  │────▶│      Nginx       │────▶│    Todo Service    │
-│  (React/Vue)│     │   (Load Balancer)│     │   (Spring Boot)    │
-└─────────────┘     └──────────────────┘     └────────────────────┘
-                            │                        │
-                            │                        ▼
-                            │              ┌────────────────────┐
-                            │              │     PostgreSQL     │
-                            │              │   (Основная БД)    │
-                            │              └────────────────────┘
-                            │                        │
-                            ▼                        ▼
-                    ┌──────────────────┐     ┌────────────────────┐
-                    │ Notification Svc │◀────│   Scheduler Svc    │
-                    │  (Spring Boot)   │ Kafka│   (Spring Boot)   │
-                    └──────────────────┘     └────────────────────┘
-                            │                        │
-                            ▼                        ▼
-                    ┌──────────────────┐     ┌────────────────────┐
-                    │    Telegram API  │     │       Redis        │
-                    │   & WebSocket    │     │     (Кэш/Хран.)    │
-                    └──────────────────┘     └────────────────────┘
-```
 
-### Технологический стек
+- **Todo Service** – CRUD operations for tasks/categories, authentication. The **only** service that writes to the database.
+- **Scheduler Service** – periodically scans for due reminders, publishes events to Kafka, uses Redis locks to avoid duplicates.
+- **Notification Service** – consumes Kafka events, sends Telegram messages, pushes WebSocket updates, stores temporary tokens in Redis.
+- **Frontend** – React / Vite app served via Nginx.
+- **Nginx** – reverse proxy and WebSocket upgrade.
 
-- **Backend**: Java 17+, Spring Boot 3.x
-- **Frontend**: TypeScript, React/Vite
-- **Базы данных**: PostgreSQL 17
-- **Очереди сообщений**: Apache Kafka
-- **Кэширование**: Redis 7
-- **Веб-сервер**: Nginx
-- **Контейнеризация**: Docker, Docker Compose
+For a detailed architecture diagram and interaction flows, see [ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
-## 🔧 Сервисы
+## 🚀 Quick Start (production‑like)
 
-### 1. Todo Service (`todo-service`)
-Основной сервис для управления задачами и категориями.
-
-**Порты**: 8080  
-**Зависимости**: PostgreSQL, Redis, Kafka
-
-**Функционал**:
-- CRUD операции с задачами
-- Управление категориями
-- Аутентификация и авторизация пользователей
-- Интеграция с Telegram
-
-### 2. Scheduler Service (`scheduler-service`)
-Сервис планировщика напоминаний.
-
-**Порты**: 8082  
-**Зависимости**: PostgreSQL, Redis, Kafka
-
-**Функционал**:
-- Планирование напоминаний
-- Отправка событий уведомлений в Kafka
-- Мониторинг просроченных задач
-
-### 3. Notification Service (`notification-service`)
-Сервис уведомлений.
-
-**Порты**: 8081  
-**Зависимости**: Redis, Kafka, PostgreSQL
-
-**Функционал**:
-- Обработка событий из Kafka
-- Отправка уведомлений в Telegram
-- WebSocket уведомления для frontend
-
-### 4. Frontend (`front/frontend`)
-Веб-интерфейс приложения.
-
-**Технологии**: TypeScript, Vite  
-**Порт**: 5173 (dev), 80 (prod через Nginx)
-
-### 5. Nginx
-Прокси-сервер для маршрутизации запросов.
-
-**Порт**: 80
-
-## 🚀 Быстрый старт
-
-### Запуск через Docker Compose
-
-Полный запуск всех сервисов в контейнерах:
+The easiest way to run the whole system is with Docker Compose:
 
 ```bash
-# 1. Скопируйте файл окружения
+git clone https://github.com/your-repo/todo-app.git
+cd todo-app
 cp .env.example .env
+# Edit .env – set TELEGRAM_BOT_TOKEN and TELEGRAM_BOT_USERNAME
+docker compose up -d --build
+```
 
-# 2. Отредактируйте .env при необходимости
-# Обязательно замените TELEGRAM_BOT_TOKEN и TELEGRAM_BOT_USERNAME
+The application will be available at **http://localhost:80**.
 
-# 3. Запустите все сервисы
-docker compose up -d
-
-# 4. Проверьте статус
+Check service status:
+```bash
 docker compose ps
-
-# 5. Просмотр логов
 docker compose logs -f
 ```
 
-Приложение будет доступно по адресу: http://localhost:80
+## 🔧 Services overview
 
-### Локальная разработка
+| Service | Port | Description |
+|---------|------|-------------|
+| Todo Service | 8080 | Task & category CRUD, auth |
+| Scheduler Service | 8082 | Reminder scheduling, Kafka producer |
+| Notification Service | 8081 | Kafka consumer, Telegram & WebSocket |
+| Frontend | 80 (via Nginx) | User interface |
+| PostgreSQL | 5432 | Main database |
+| Redis | 6379 | Caching, locks, tokens |
+| Kafka | 9092 | Event bus |
 
-Для разработки отдельных сервисов без контейнеризации:
-
-#### Предварительные требования
-
-- Java 17+
-- Maven 3.8+
-- Node.js 18+
-- Docker (для инфраструктуры)
-
-#### 1. Запуск инфраструктуры
-
-```bash
-docker compose up postgres kafka redis -d
-```
-
-#### 2. Настройка окружения
-
-```bash
-cp .env.example .env
-# Отредактируйте .env под ваши нужды
-```
-
-#### 3. Запуск сервисов
-
-**Todo Service:**
-```bash
-cd todo-service
-export $(cat ../.env | xargs) && mvn spring-boot:run
-```
-
-**Scheduler Service:**
-```bash
-cd scheduler-service
-export $(cat ../.env | xargs) && mvn spring-boot:run
-```
-
-**Notification Service:**
-```bash
-cd notification-service
-export $(cat ../.env | xargs) && mvn spring-boot:run
-```
-
-**Frontend:**
-```bash
-cd front/frontend
-pnpm install
-pnpm dev
-```
-
-#### 4. Доступ к сервисам
-
-| Сервис | URL |
-|--------|-----|
-| Frontend | http://localhost:5173 |
-| Todo API | http://localhost:8080/api |
-| Notification WS | ws://localhost:8081/ws |
-| PostgreSQL | localhost:5432 |
-| Kafka | localhost:9092 |
-| Redis | localhost:6379 |
-
-## 🔄 Взаимодействие сервисов
-
-### Схема взаимодействия
+## 📂 Project structure
 
 ```
-┌──────────────┐         ┌──────────────┐         ┌─────────────────┐
-│ Todo Service │────────▶│     Kafka    │────────▶│ Notification Svc│
-│              │ publish │              │consume  │                 │
-└──────────────┘         └──────────────┘         └─────────────────┘
-       │                       │                          │
-       │                       │                          ▼
-       │                       │                   ┌─────────────┐
-       │                       │                   │  Telegram   │
-       │                       │                   │     API     │
-       │                       │                   └─────────────┘
-       │                       │                          │
-       ▼                       ▼                          ▼
-┌──────────────┐         ┌──────────────┐         ┌─────────────┐
-│ PostgresSQL  │         │    Redis     │         │  Frontend   │
-│   (Данные)   │         │  (Кэш/Сессии)│         │(WebSocket)  │
-└──────────────┘         └──────────────┘         └─────────────┘
+.
+├── todo-service/          # Spring Boot CRUD API
+├── scheduler-service/     # Reminder scheduler
+├── notification-service/  # Notification handler
+├── front/                 # React/Vite frontend
+├── docker-compose.yml
+├── .env.example
+├── LICENSE
+└── README.md
 ```
 
-### Топики Kafka
 
-| Топик | Производитель | Потребитель | Описание |
-|-------|--------------|-------------|----------|
-| `telegram-notifications` | Scheduler Service | Notification Service | События для отправки Telegram уведомлений |
-| `websocket-notifications` | Scheduler Service | Notification Service | События для WebSocket уведомлений |
+## 🤝 Contributing
 
-### Последовательность обработки напоминания
+1. Fork the repo.
+2. Create a feature branch.
+3. Commit your changes.
+4. Push and open a Pull Request.
 
-1. **Scheduler Service** проверяет задачи в PostgreSQL
-2. При наступлении времени напоминания создается событие `NotificationEvent`
-3. Событие публикуется в Kafka топик `telegram-notifications` или `websocket-notifications`
-4. **Notification Service** потребляет событие из Kafka
-5. Уведомление отправляется через Telegram Bot API или WebSocket
-6. Статус обновления сохраняется в PostgreSQL
 
-### REST API взаимодействие
+## 📄 License
 
-```
-Frontend ──HTTP──▶ Nginx ──HTTP──▶ Todo Service
-                                  │
-                                  ▼
-                            PostgreSQL
-```
-
-### WebSocket взаимодействие
-
-```
-Frontend ──WS──▶ Nginx ──WS──▶ Notification Service
-                                │
-                                ▼
-                              Redis (Pub/Sub)
-```
-
-## 📦 Релизы
-
-### Версионирование
-
-Проект использует [Semantic Versioning](https://semver.org/lang/ru/):
-- **MAJOR** - несовместимые изменения API
-- **MINOR** - новая функциональность
-- **PATCH** - исправления ошибок
-
-### Подготовка релиза
-
-1. **Обновите версию в pom.xml**:
-   ```bash
-   # В каждом сервисе обновите версию
-   mvn versions:set -DnewVersion=1.0.0
-   ```
-
-2. **Создайте Git тег**:
-   ```bash
-   git add .
-   git commit -m "release: v1.0.0"
-   git tag -a v1.0.0 -m "Release version 1.0.0"
-   git push origin v1.0.0
-   ```
-
-3. **Соберите Docker образы**:
-   ```bash
-   docker compose build
-   ```
-
-4. **Протестируйте сборку**:
-   ```bash
-   docker compose up -d
-   docker compose ps
-   ```
-
-5. **Создайте Release на GitHub**:
-   - Перейдите в раздел Releases
-   - Нажмите "Create a new release"
-   - Выберите тег
-   - Добавьте описание изменений (CHANGELOG)
-   - Опубликуйте релиз
-
-### CI/CD рекомендации
-
-Для автоматизации релизов рекомендуется настроить:
-- GitHub Actions для сборки и тестирования
-- Автоматическую публикацию Docker образов в Docker Hub
-- Автоматическое создание релизов при пуше тега
-
-## 📄 Лицензия
-
-Этот проект распространяется под лицензией MIT License.
-
-```
-MIT License
-
-Copyright (c) 2024
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
-
-## 🤝 Вклад в проект
-
-1. Создайте форк репозитория
-2. Создайте ветку для вашей фичи (`git checkout -b feature/amazing-feature`)
-3. Закоммитьте изменения (`git commit -m 'Add some amazing feature'`)
-4. Отпушьте в ветку (`git push origin feature/amazing-feature`)
-5. Создайте Pull Request
-
-## 📞 Контакты
-
-- Email: ваш-email@example.com
-- Telegram: @your-username
-
----
-
-**Статус проекта**: В разработке ⚠️
+MIT License – see [LICENSE](LICENSE) for details.
